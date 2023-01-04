@@ -321,6 +321,7 @@ window.addEventListener("DOMContentLoaded", () => {
     // SLIDER
 
     const slides = document.querySelectorAll(".offer__slide"),
+          slider = document.querySelector(".offer__slider"),
           prev = document.querySelector(".offer__slider-prev"),  // стрелочки слайдера
           next = document.querySelector(".offer__slider-next"),
           current = document.querySelector("#current"),         // цифры слайдера
@@ -353,6 +354,34 @@ window.addEventListener("DOMContentLoaded", () => {
         slide.style.width = width;    // назначаем каждому слайду ширину обертки slidesWrapper
     });
 
+    slider.style.position = 'relative';
+
+    const indicators = document.createElement('ol'), // создание индикатора
+          dots = [];                                 //  массив для точек
+
+    indicators.classList.add('carousel-indicators');
+    slider.append(indicators);
+
+    for (let i = 0; i < slides.length; i++) {  // создание точек на слайдере
+        const dot = document.createElement('li'); 
+
+        dot.classList.add('dot');
+        dot.setAttribute('data-slide-to', i+1); // установка атрибута каждой точке слайдера
+
+        if (i == 0) {
+            dot.style.opacity = 1;       // делаем первый индикатор активным
+        }
+        indicators.append(dot);
+        dots.push(dot);                        // кладем наши точки в массив dots
+    }
+
+
+    function changeOpacity(arr) {                 // изменение активности индикаторам в слайдере
+        arr.forEach(i => i.style.opacity = '.5'); // установка все элементам массива dots неактивности
+        arr[slideIndex - 1].style.opacity = '1';  // активация индикатора слайдера в зависимости от индекса
+    }
+
+
     next.addEventListener('click', () => {  // клик на стрелку вправо
         if (offset == +width.slice(0, width.length -2) * (slides.length -1)) {  // ширина одного слайда * (кол-во слайдов - 1)
             offset = 0;
@@ -373,6 +402,8 @@ window.addEventListener("DOMContentLoaded", () => {
         } else {
             current.textContent = slideIndex;
         }
+
+        changeOpacity(dots);
     });
 
     prev.addEventListener('click', () => {  // клик на стрелку влево
@@ -395,9 +426,28 @@ window.addEventListener("DOMContentLoaded", () => {
         } else {
             current.textContent = slideIndex;
         }
+
+        changeOpacity(dots);
     });
     
-    
+    dots.forEach(dot => { // присваиваем каждому атрибуту событие клика
+        dot.addEventListener('click', (e) => {
+            const slideTo = e.target.getAttribute('data-slide-to'); // перехватываем дата-атрибут при клике на элемент
+            
+            slideIndex = slideTo; // присваиваем индексу слайда номер дата-атрибута
+            offset = +width.slice(0, width.length -2) * (slideTo -1);
+
+            slidesField.style.transform = `translateX(-${offset}px)`;
+
+            if (slides.length < 10) {    // изменение цифр слайдера при клике
+                current.textContent = `0${slideIndex}`;
+            } else {
+                current.textContent = slideIndex;
+            }
+
+            changeOpacity(dots); 
+        });
+    });
 });
     
     

@@ -381,12 +381,16 @@ window.addEventListener("DOMContentLoaded", () => {
         arr[slideIndex - 1].style.opacity = '1';  // активация индикатора слайдера в зависимости от индекса
     }
 
+    function deleteNotDigits (str) {     // превращает width в число для дальнейших вычислений
+       return +str.replace(/\D/g, '');
+    }
+
 
     next.addEventListener('click', () => {  // клик на стрелку вправо
-        if (offset == +width.slice(0, width.length -2) * (slides.length -1)) {  // ширина одного слайда * (кол-во слайдов - 1)
+        if (offset == deleteNotDigits (width) * (slides.length -1)) {  // ширина одного слайда * (кол-во слайдов - 1)
             offset = 0;
         } else {
-            offset += +width.slice(0, width.length -2);
+            offset += deleteNotDigits (width);
         }
 
         slidesField.style.transform = `translateX(-${offset}px)`;  // смещаем слайд влево на определенное значение
@@ -408,9 +412,9 @@ window.addEventListener("DOMContentLoaded", () => {
 
     prev.addEventListener('click', () => {  // клик на стрелку влево
         if (offset == 0) {  
-            offset = +width.slice(0, width.length -2) * (slides.length -1);
+            offset = deleteNotDigits (width) * (slides.length -1);
         } else {
-            offset -= +width.slice(0, width.length -2); // отнимаем ширину слайда, на которую смещаемся
+            offset -= deleteNotDigits (width); // отнимаем ширину слайда, на которую смещаемся
         }
 
         slidesField.style.transform = `translateX(-${offset}px)`;  // смещаем слайд влево на определенное значение
@@ -435,7 +439,7 @@ window.addEventListener("DOMContentLoaded", () => {
             const slideTo = e.target.getAttribute('data-slide-to'); // перехватываем дата-атрибут при клике на элемент
             
             slideIndex = slideTo; // присваиваем индексу слайда номер дата-атрибута
-            offset = +width.slice(0, width.length -2) * (slideTo -1);
+            offset = deleteNotDigits (width) * (slideTo -1);
 
             slidesField.style.transform = `translateX(-${offset}px)`;
 

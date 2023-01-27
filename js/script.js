@@ -38,7 +38,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
     // TIMER
 
-    const deadline = '2022-10-21'; // дата окончания акции.(наш endtime)
+    const deadline = '2023-10-21'; // дата окончания акции.(наш endtime)
 
     function getTimeRemaining(endtime) { 
         let days, hours, minutes, seconds;
@@ -452,6 +452,123 @@ window.addEventListener("DOMContentLoaded", () => {
             changeOpacity(dots); 
         });
     });
+
+    // Calc
+
+    const result = document.querySelector('.calculating__result span'); // результат вычислений
+
+    let sex, height, weight, age, ratio;   // переменные для вычислений
+
+    if(localStorage.getItem('sex')) {
+        sex = localStorage.getItem('sex');
+    } else {
+        sex = 'female';
+        localStorage.setItem('sex', 'female');
+    }
+
+    if(localStorage.getItem('ratio')) {
+        ratio = localStorage.getItem('ratio');
+    } else {
+        ratio = '1.375';
+        localStorage.setItem('ratio', '1.375');
+    }
+
+    function initLocalSettings(selector, activeClass) {  // функции назначает класс активности элементам при заходе на страницу(из localStorage юзера)
+
+        const elements = document.querySelectorAll(selector);
+
+        elements.forEach(elem => {             
+            elem.classList.remove(activeClass);
+            if (elem.getAttribute('id') === localStorage.getItem('sex')) {      // если id пола совпадает с полом из хранилища, то кнопка подсвечивается
+                elem.classList.add(activeClass);
+            }
+
+            if (elem.getAttribute('data-ratio') === localStorage.getItem('ratio')) {
+                elem.classList.add(activeClass);
+            }
+        });
+    }
+
+    initLocalSettings('#gender div', 'calculating__choose-item_active');
+    initLocalSettings('.calculating__choose_big div', 'calculating__choose-item_active');
+
+    function calcTotal() {                                     // рассчет каллорий
+        if (!sex || !height || !weight || !age || !ratio) {     // проверить потом  заканчивается ли функция когда видит return, если он в находится в условии if
+            result.textContent = '____';
+            return;
+        }
+
+        if (sex === 'female') {
+            result.textContent = Math.round((447.6 + (9.2 * weight) + (3.1 * height) - (4.3 * age)) * ratio);
+
+        } else {
+            result.textContent = Math.round((88.36 + (13.4 * weight) + (4.8 * height) - (5.7 * age)) * ratio);
+        }
+    }
+
+    calcTotal();
+
+    function getStaticInformation(selector, activeClass) {  // передаем значения в переменные. Атрибуты функции - родительский класс и класс активности(зеленый)
+        const elements = document.querySelectorAll(selector); // получаем все (кнопки) внутри нашего родителя
+
+        elements.forEach(elem => {
+            elem.addEventListener('click', (e) => {  // используем конструкцию document.querySelector, тк он будет содержать в себе все кнопки сразу
+                if(e.target.getAttribute('data-ratio')) {    //  мы берем все кнопки калькулятора, в том числе атрибуты мужчина/женщина. 
+                    ratio = +e.target.getAttribute('data-ratio');    // Условие if проверяет наличие дата-атрибута, который есть только у нижних кнопок
+                    localStorage.setItem('ratio', e.target.getAttribute('data-ratio')); // запоминается значение активности пользователя
+                } else {
+                    sex = e.target.getAttribute('id');
+                    localStorage.setItem('sex', e.target.getAttribute('id'));
+                }
+    
+    
+                elements.forEach(elem => {    // очистка все активных классов(зеленых кнопок)
+                    elem.classList.remove(activeClass); 
+                });
+    
+                e.target.classList.add(activeClass); // назначаем класс активности
+                calcTotal();
+            });
+        });
+
+       
+    }
+
+    getStaticInformation('#gender div', 'calculating__choose-item_active'); //используем id а не класс, тк классы у нас повторяются. div используется, тк внутри селектора блоки обернуты в div
+    getStaticInformation('.calculating__choose_big div', 'calculating__choose-item_active' ); // вызов функции два раза(для пола и кэфа активности), тк в верстке у нескольких блоков одинаковый класс и приходится брать вторые классы блоков
+
+    function getDynamicInformation(selector) {       // динамически отслеживает ввод переменных
+        const input = document.querySelector(selector);
+
+        input.addEventListener('input', () => {    // следит за вводом значений на сайте
+
+            if(input.value.match(/\D/g)) {          // обводка красным если в инпут введен текст
+                input.style.border = '1px solid red';
+            } else {
+                input.style.border = 'none';
+            }
+
+            switch(input.getAttribute('id')) {     // проверяет значение атрибута id и присваивает значения переменым в зависимости от этого
+                case 'height':
+                    height = +input.value;
+                    break;
+                case 'weight':
+                    weight = +input.value;
+                    break;
+                case 'age':
+                    age = +input.value;
+                    break;
+            }
+            calcTotal();     // пересчитывает норму каллорий каждый раз, когда меняются значения
+        });
+        
+    }
+
+    getDynamicInformation('#height');
+    getDynamicInformation('#weight');
+    getDynamicInformation('#age');
+
+
 });
     
     
